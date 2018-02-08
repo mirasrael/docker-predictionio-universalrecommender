@@ -10,7 +10,20 @@ RUN cd ~/ur \
   && sed -i -r 's/\/\/resolvers \+= .*/resolvers += "Local Repository" at "file:\/\/\/home\/predictionio\/.custom-scala-m2\/repo"/g' build.sbt \
   && sed -i 's/val mahoutVersion = "0.13.1-SNAPSHOT"/val mahoutVersion = "0.13.0"/' build.sbt \
   && sed -i 's/mahoutVersion classifier "spark_2.1"/mahoutVersion/' build.sbt
-RUN cd ~/ur && pio-start-all && pio build
+RUN cd ~/ur && pio build
 
 WORKDIR /home/predictionio/ur
+
+COPY ur-entrypoint.sh /ur-entrypoint.sh
+RUN sudo chmod +x /ur-entrypoint.sh
+COPY prepare-engine.sh /prepare-engine.sh
+RUN sudo chmod +x /prepare-engine.sh
+
+ONBUILD COPY engine.json /home/predictionio/ur/engine.json
+ONBUILD RUN /prepare-engine.sh
+
+ENTRYPOINT ["/ur-entrypoint.sh"]
+
+CMD ["bash", "-c", "pio train -- --driver-memory 4G --executor-memory 4G && pio deploy"]
+
 
