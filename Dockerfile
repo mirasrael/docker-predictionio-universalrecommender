@@ -16,14 +16,18 @@ WORKDIR /home/predictionio/ur
 
 COPY ur-entrypoint.sh /ur-entrypoint.sh
 RUN sudo chmod +x /ur-entrypoint.sh
+COPY engine-manager.py /home/predictionio/ur/engine-manager.py
+RUN sudo chmod +x /home/predictionio/ur/engine-manager.py
 COPY prepare-engine.sh /prepare-engine.sh
 RUN sudo chmod +x /prepare-engine.sh
 
 ONBUILD COPY engine.json /home/predictionio/ur/engine.json
 ONBUILD RUN /prepare-engine.sh
 
+EXPOSE 9500
+
 ENTRYPOINT ["/ur-entrypoint.sh"]
 
-CMD ["bash", "-c", "pio train -- --driver-memory 4G --executor-memory 4G && pio deploy"]
+CMD ["bash", "-c", "./engine-manager.py"]
 
 
