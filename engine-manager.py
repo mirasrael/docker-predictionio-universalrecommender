@@ -58,23 +58,27 @@ class EngineManagerHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_not_found()
 
     def copy_chunked_body(self, dest):
+        """
+        Copy chunked body to destination file-like object
+
+        chunks ::= chunk* last_chunk
+        chunk ::= chunk_size CRLF chunk_body CRLF
+        last_chunk ::= 0 CRLF CRLF
+
+        :param dest:
+        :return:
+        """
         while True:
-            chunk_size = ''
-            while True:
-                ch = self.rfile.read(1)
-                if ch == '\r':
-                    break
-                chunk_size += ch
-            chunk_size = int(chunk_size or '0', 16)
+            chunk_size = self.rfile.readline(65537)
+            if len(chunk_size) > 65536:
+                raise ValueError("Invalid chunk_size")
+            chunk_size = int(chunk_size, 16)
+            if chunk_size > 0:
+                dest.write(self.rfile.read(chunk_size))
+            self.rfile.readline()
             # zero indicates last chunk
             if chunk_size == 0:
-                return
-            # by protocol definition it should use CRLF as separator
-            if self.rfile.read(1) != '\n':
-                raise ValueError("Invalid new line indicator for chunk size")
-            dest.write(self.rfile.read(chunk_size))
-            if self.rfile.read(1) != '\r' and self.rfile.read(1) != '\n':
-                raise ValueError("Invalid new line indicator after chunk")
+                break
 
     def handle_app_seed(self):
         tmp_file_name = tempfile.mktemp()
