@@ -25,6 +25,7 @@ RUN sudo chmod +x /prepare-engine.sh
 ONBUILD COPY engine.json /home/predictionio/ur/engine.json
 
 EXPOSE 9500
+EXPOSE 7070
 
 ENTRYPOINT ["/ur-entrypoint.sh"]
 

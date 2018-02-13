@@ -48,8 +48,10 @@ class EngineManagerHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             elif parts.path == "/app/train":
                 return self.send_command_output(
                     ["pio", "train", "--", "--driver-memory", driver_memory, "--executor-memory", executor_memory])
-            elif parts.path == "/app/seed":
-                return self.handle_app_seed()
+            elif parts.path == "/app/import":
+                return self.handle_import_data()
+            elif parts.path == "/app/data-delete":
+                return self.send_command_output(["pio", "app", "data-delete", app_name, "--force"])
         except StandardError as ex:
             traceback.print_exc()
             self.send_server_error(ex.message)
@@ -80,7 +82,7 @@ class EngineManagerHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if chunk_size == 0:
                 break
 
-    def handle_app_seed(self):
+    def handle_import_data(self):
         tmp_file_name = tempfile.mktemp()
         try:
             with open(tmp_file_name, 'wb') as tmp:
@@ -92,7 +94,6 @@ class EngineManagerHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 else:
                     self.send_server_error("Can't determine content-length")
 
-            subprocess.check_output(["pio", "app", "data-delete", app_name, "--force"])
             self.send_command_output(["pio", "import", "--appid", app_id, "--input", tmp_file_name])
         finally:
             os.unlink(tmp_file_name)
