@@ -12,6 +12,7 @@ RUN cd ~/ur \
   && sed -i 's/mahoutVersion classifier "spark_2.1"/mahoutVersion/' build.sbt
 RUN cd ~/ur && pio build
 
+VOLUME ["/PredictionIO-0.12.0-incubating/vendors/hbase-1.2.6/data", "/PredictionIO-0.12.0-incubating/vendors/elasticsearch-5.5.2/data"]
 WORKDIR /home/predictionio/ur
 
 COPY ur-entrypoint.sh /ur-entrypoint.sh
@@ -22,7 +23,6 @@ COPY prepare-engine.sh /prepare-engine.sh
 RUN sudo chmod +x /prepare-engine.sh
 
 ONBUILD COPY engine.json /home/predictionio/ur/engine.json
-ONBUILD RUN /prepare-engine.sh
 
 EXPOSE 9500
 
