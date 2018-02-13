@@ -16,6 +16,7 @@ except ImportError:
 
 ip = "0.0.0.0"
 port = 9500
+app_name = os.environ['PIO_APP_NAME']
 app_id = os.environ['PIO_APP_ID']
 work_dir = "/home/predictionio/ur"
 driver_memory = "4G"
@@ -87,6 +88,7 @@ class EngineManagerHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 else:
                     self.send_server_error("Can't determine content-length")
 
+            subprocess.check_output(["pio", "app", "data-delete", app_name, "--force"])
             self.send_command_output(["pio", "import", "--appid", app_id, "--input", tmp_file_name])
         finally:
             os.unlink(tmp_file_name)
