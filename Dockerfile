@@ -12,7 +12,7 @@ RUN cd ~/ur \
   && sed -i 's/mahoutVersion classifier "spark_2.1"/mahoutVersion/' build.sbt
 RUN cd ~/ur && pio build
 
-VOLUME ["/PredictionIO-0.12.0-incubating/vendors/hbase-1.2.6/data", "/PredictionIO-0.12.0-incubating/vendors/elasticsearch-5.5.2/data"]
+VOLUME ["/PredictionIO-0.12.0-incubating/vendors/hbase-1.2.6/data", "/PredictionIO-0.12.0-incubating/vendors/elasticsearch-5.5.2/data", "/home/predictionio/.pio_store"]
 WORKDIR /home/predictionio/ur
 
 COPY ur-entrypoint.sh /ur-entrypoint.sh

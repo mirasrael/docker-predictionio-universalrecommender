@@ -7,6 +7,7 @@ fi
 
 sudo chown predictionio:root /PredictionIO-0.12.0-incubating/vendors/hbase-1.2.6/data
 sudo chown predictionio:root /PredictionIO-0.12.0-incubating/vendors/elasticsearch-5.5.2/data
+sudo chown predictionio:predictionio /home/predictionio/.pio_store
 
 pio-start-all
 pio status || pio status # give a second try
