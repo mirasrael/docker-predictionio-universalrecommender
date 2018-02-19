@@ -19,8 +19,8 @@ port = 9500
 app_name = os.environ['PIO_APP_NAME']
 app_id = os.environ['PIO_APP_ID']
 work_dir = "/home/predictionio/ur"
-driver_memory = "4G"
-executor_memory = "4G"
+driver_memory = os.environ.get('PIO_DRIVER_MEMORY', '1G')
+executor_memory = os.environ.get('PIO_EXECUTOR_MEMORY', '1G')
 
 __version__ = "0.1"
 
