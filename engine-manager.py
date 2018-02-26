@@ -22,15 +22,16 @@ work_dir = "/home/predictionio/ur"
 driver_memory = os.environ.get('PIO_DRIVER_MEMORY', '1G')
 executor_memory = os.environ.get('PIO_EXECUTOR_MEMORY', '1G')
 
-__version__ = "0.1"
+__version__ = "0.2.0"
 
-print("Staring Prediction.IO Engine Manager...")
+print("Starting Prediction.IO Engine Manager...")
 
 
 # noinspection PyPep8Naming
 class EngineManagerHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
     server_version = 'PredictionIOEngineManager/' + __version__
+    deploy_process = None
 
     def do_GET(self):
         parts = urlparse.urlsplit(self.path)
@@ -42,8 +43,13 @@ class EngineManagerHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             parts = urlparse.urlsplit(self.path)
+            self.log_message("Processing command: %s...", parts.path)
             if parts.path == '/app/deploy':
-                subprocess.Popen(["pio", "deploy"])
+                if EngineManagerHandler.deploy_process:
+                    self.log_message("Killing existing process: %d", EngineManagerHandler.deploy_process.pid)
+                    subprocess.check_call(['pkill', '-TERM', '-P', str(EngineManagerHandler.deploy_process.pid)])
+                    EngineManagerHandler.deploy_process = None
+                EngineManagerHandler.deploy_process = subprocess.Popen(["pio", "deploy"])
                 return self.send_content("Deploy initiated")
             elif parts.path == "/app/train":
                 return self.send_command_output(
@@ -127,7 +133,11 @@ class EngineManagerHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             f.close()
 
 
-httpd = SocketServer.TCPServer((ip, port), EngineManagerHandler)
+if __name__ == '__main__':
+    httpd = SocketServer.TCPServer((ip, port), EngineManagerHandler)
 
-print("Prediction.IO Engine Manager listening: {}:{}".format(ip, port))
-httpd.serve_forever()
+    sys.stderr.write("Trying to deploy engine... It is OK to fail on this stage\n")
+    EngineManagerHandler.deploy_process = subprocess.Popen(["pio", "deploy"])
+
+    sys.stderr.write("Prediction.IO Engine Manager listening: {}:{}\n".format(ip, port))
+    httpd.serve_forever()
