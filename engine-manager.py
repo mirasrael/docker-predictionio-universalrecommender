@@ -89,7 +89,7 @@ class EngineManagerHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def deploy(self):
         if EngineManagerHandler.deploy_process:
             self.log_message("Killing existing process: %d", EngineManagerHandler.deploy_process.pid)
-            subprocess.check_call(['pkill', '-TERM', '-P', str(EngineManagerHandler.deploy_process.pid)])
+            subprocess.call(['pkill', '-TERM', '-P', str(EngineManagerHandler.deploy_process.pid)])
             EngineManagerHandler.deploy_process = None
         EngineManagerHandler.deploy_process = subprocess.Popen(["pio", "deploy"])
         return "Deploy initiated"
